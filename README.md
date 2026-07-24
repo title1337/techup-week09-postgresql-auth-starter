@@ -4,6 +4,12 @@ Starter code for the Friday full-stack workshop.
 
 Requirements: Node.js 20.19 or newer and a local PostgreSQL server.
 
+## Student board
+
+Download [`student-board.excalidraw`](./student-board.excalidraw) and open it with [Excalidraw](https://excalidraw.com/).
+
+This README contains the setup steps, mission summary, and API summary. The board adds the architecture flow, ERD, mission prompts, endpoint exercise, and exit check.
+
 ## Your missions
 
 1. Register a user with a hashed password.
