@@ -62,22 +62,68 @@ npm install
 npm run dev
 ```
 
-## Frontend task
+## Frontend task — แก้เพียงไฟล์เดียว
 
-Edit only:
+Frontend เตรียม UI, routing, form, validation, Axios และการแนบ JWT token ไว้ให้แล้ว นักเรียนไม่ต้องสร้าง component หรือเขียน request ใหม่
+
+### Step 1: เปิดไฟล์ที่ต้องแก้
+
+ใน VS Code Explorer ให้เปิดตามลำดับนี้:
 
 ```text
-client/src/config/apiEndpoints.js
+client
+└── src
+    └── config
+        └── apiEndpoints.js  ← แก้เฉพาะไฟล์นี้
 ```
 
-Fill the four required endpoint paths:
+Full path คือ `client/src/config/apiEndpoints.js`
 
-- `register`
-- `login`
-- `listPosts`
-- `createPost`
+### Step 2: เติม endpoint งานหลัก 4 จุด
 
-Do not add Axios calls, tokens, form state, or validation. Those parts are already prepared.
+ในไฟล์จะมีช่องว่าง `""` เตรียมไว้ ให้เปลี่ยนเฉพาะค่าด้านขวาของ key ต่อไปนี้:
+
+| Key ใน `apiEndpoints.js` | เชื่อมกับ Backend | ใช้ทำอะไร |
+|---|---|---|
+| `register` | `POST /auth/register` | สมัครสมาชิก |
+| `login` | `POST /auth/login` | Login และรับ JWT |
+| `listPosts` | `GET /posts` | โหลดรายการโพสต์และ filter |
+| `createPost` | `POST /posts` | สร้างโพสต์ด้วย Bearer token |
+
+ใส่เฉพาะ endpoint path ที่ขึ้นต้นด้วย `/` ไม่ต้องใส่ `http://localhost:4000` เพราะ Axios ตั้งค่า base URL ไว้แล้ว
+
+### Step 3: ทำ Bonus หลังงานหลักผ่านแล้ว
+
+ฟังก์ชัน Bonus เตรียม parameter `postId` ไว้แล้ว:
+
+| Key | เชื่อมกับ Backend |
+|---|---|
+| `getPost(postId)` | `GET /posts/:postId` |
+| `updatePost(postId)` | `PUT /posts/:postId` |
+| `deletePost(postId)` | `DELETE /posts/:postId` |
+
+ตอนเติม path ให้ใช้ค่า `postId` ที่ฟังก์ชันรับมาแทนข้อความ `:postId`
+
+### ไฟล์ Frontend ที่ไม่ต้องแก้
+
+- `src/api/apiClient.js` — เตรียม Axios, base URL และ JWT interceptor แล้ว
+- `src/context/AuthContext.jsx` — เตรียม Login, Logout และการจำสถานะผู้ใช้แล้ว
+- `src/pages/` — เตรียม Feed, Register, Login, Create, View และ Edit UI แล้ว
+- `src/App.jsx` — เตรียม routes และ protected page แล้ว
+- `src/styles.css` — เตรียม responsive design แล้ว
+
+อย่าเพิ่ม `fetch`, อย่าสร้าง Axios request ซ้ำ, อย่าเปลี่ยน HTTP method, request body, query parameters หรือ token logic
+
+### Step 4: ทดสอบหลังเติม endpoint
+
+1. ตรวจว่า Backend ทำงานที่ `http://localhost:4000`
+2. เปิดหน้า React แล้วลอง Register
+3. Login ด้วย account ที่เพิ่งสร้าง
+4. กลับหน้า Feed และตรวจว่ารายการโพสต์โหลดได้
+5. Login แล้วลอง Create Post
+6. Logout และตรวจว่ายังอ่าน Public Feed ได้
+
+ถ้า endpoint ยังว่างหรือพิมพ์ผิด หน้าเว็บจะแสดงข้อความแนะนำแทนการยิง request ไปผิด URL
 
 ## API summary
 
