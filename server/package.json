@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js",
+    "start": "nodemon app.js",
     "check": "node --check app.js && node --check apps/auth.js && node --check apps/posts.js && node --check middlewares/protect.js && node --check utils/db.js"
   },
   "dependencies": {

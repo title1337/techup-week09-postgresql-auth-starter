@@ -111,13 +111,11 @@ authRouter.post('/register', async (req, res) => {
     }
     console.log(error);
     return res.status(500).json({
-      message: 'Something went wrong',
+      message: 'Server could not register user',
     });
   }
-  return res.status(501).json({
-    message: 'Mission 1A: Register API is not implemented',
-  });
 });
+
 // ภารกิจที่ 1A
 // 1. Hash input.data.password ด้วย bcrypt
 // 2. INSERT username, password_hash, first_name และ last_name
@@ -133,16 +131,62 @@ authRouter.post('/login', async (req, res) => {
       message: input.error,
     });
   }
+  try {
+    const result = await connectionPool.query(
+      ` SELECT user_id, username, password_hash, first_name, last_name
+      FROM  users
+      WHERE username = $1 
+    `,
+      [input.data.username],
+    );
+    const user = result.rows[0];
 
+    if (!user) {
+      return res.status(401).json({
+        message: 'Invalid username or password',
+      });
+    }
+
+    const isPassawordValid = await bcrypt.compare(
+      input.data.password,
+      user.password_hash,
+    );
+
+    if (!isPassawordValid) {
+      return res.status(401).json({
+        message: 'Invalid username or password',
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user.user_id,
+        username: user.username,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '2h',
+      },
+    );
+    return res.status(200).json({
+      message: 'Login successful',
+      data: {
+        token,
+        user: safeUser(user),
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: 'Something went wrong',
+    });
+  }
   // ภารกิจที่ 1B
   // 1. SELECT ผู้ใช้ด้วย input.data.username
   // 2. เปรียบเทียบ input.data.password กับ password_hash
   // 3. ใช้ข้อความ 401 แบบเดียวกันทั้งกรณีไม่พบผู้ใช้และรหัสผ่านไม่ถูกต้อง
   // 4. สร้าง token จาก { userId, username } ด้วย JWT_SECRET และกำหนดอายุ 2 ชั่วโมง
   // 5. ส่ง token และข้อมูลผู้ใช้ที่ปลอดภัยกลับไป
-  return res.status(501).json({
-    message: 'Mission 1B: Login API is not implemented',
-  });
 });
 
 export default authRouter;
