@@ -73,8 +73,6 @@ postRouter.get("/", async (req, res) => {
   // 3. ใช้ status และ search เป็นตัวกรองแบบไม่บังคับ โดยส่งค่าผ่าน parameter
   // 4. เรียงโพสต์ใหม่ที่สุดขึ้นก่อน
   // 5. ส่งผลลัพธ์กลับในรูปแบบ { data: result.rows }
-  void connectionPool;
-
   return res.status(501).json({
     message: "Mission 2: List Posts API is not implemented",
   });

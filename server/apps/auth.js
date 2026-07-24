@@ -85,10 +85,6 @@ authRouter.post("/register", async (req, res) => {
   // 3. ส่งค่าผ่าน parameter และใช้ RETURNING เฉพาะข้อมูลผู้ใช้ที่ปลอดภัย
   // 4. ส่ง status 201 พร้อมผลลัพธ์จาก safeUser(...)
   // 5. เมื่อ PostgreSQL แจ้งรหัสข้อมูลซ้ำ 23505 ให้เปลี่ยนเป็น status 409
-  void bcrypt;
-  void connectionPool;
-  void safeUser;
-
   return res.status(501).json({
     message: "Mission 1A: Register API is not implemented",
   });
@@ -109,8 +105,6 @@ authRouter.post("/login", async (req, res) => {
   // 3. ใช้ข้อความ 401 แบบเดียวกันทั้งกรณีไม่พบผู้ใช้และรหัสผ่านไม่ถูกต้อง
   // 4. สร้าง token จาก { userId, username } ด้วย JWT_SECRET และกำหนดอายุ 2 ชั่วโมง
   // 5. ส่ง token และข้อมูลผู้ใช้ที่ปลอดภัยกลับไป
-  void jwt;
-
   return res.status(501).json({
     message: "Mission 1B: Login API is not implemented",
   });
