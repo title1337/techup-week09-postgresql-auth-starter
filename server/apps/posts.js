@@ -67,15 +67,71 @@ postRouter.get('/', async (req, res) => {
     });
   }
 
+  const conditions = [];
+  const values = [];
+
+  // if (search) {
+  //   const searchPattern = `%${search}%`;
+  //   values.push(searchPattern);
+  //   const searchParamIndex = values.length;
+  //   conditions.push(`posts.title ILIKE $${searchParamIndex}`);
+  // }
+  // const hasConditions = conditions.length > 0;
+  // const whereClause = hasConditions ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  try {
+    const result = await connectionPool.query(
+      `
+        SELECT
+          posts.post_id,
+          posts.title,
+          posts.content,
+          posts.status,
+          posts.created_at,
+          posts.updated_at,
+          posts.published_at,
+          CONCAT(users.first_name, ' ', users.last_name) AS author_name
+        FROM posts
+        INNER JOIN users
+          ON posts.author_id = users.user_id
+        ORDER BY posts.created_at DESC
+      `,
+      values,
+    );
+    let posts = result.rows;
+
+    if (status) {
+      posts = posts.filter((post) => post.status === status);
+    }
+
+    if (search) {
+      const keyword = search.toLowerCase();
+
+      posts = posts.filter((post) => {
+        const title = post.title.toLowerCase();
+        const content = post.content.toLowerCase();
+
+        return title.includes(keyword) || content.includes(keyword);
+      });
+    }
+
+    return res.status(200).json({
+      data: posts,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: 'Can not Get data',
+    });
+  }
+
   // ภารกิจที่ 2
   // 1. SELECT ข้อมูลจาก posts และ JOIN กับ users ผ่าน author_id
   // 2. สร้างชื่อผู้เขียนด้วย CONCAT(first_name, ' ', last_name) AS author_name
   // 3. ใช้ status และ search เป็นตัวกรองแบบไม่บังคับ โดยส่งค่าผ่าน parameter
   // 4. เรียงโพสต์ใหม่ที่สุดขึ้นก่อน
   // 5. ส่งผลลัพธ์กลับในรูปแบบ { data: result.rows }
-  return res.status(501).json({
-    message: 'Mission 2: List Posts API is not implemented',
-  });
 });
 
 postRouter.post('/', protect, async (req, res) => {
@@ -86,17 +142,51 @@ postRouter.post('/', protect, async (req, res) => {
       message: input.error,
     });
   }
+  const publishedAt = input.data.status === 'published' ? new Date() : null;
+  try {
+    const result = await connectionPool.query(
+      `
+      INSERT INTO post (
+      title,
+      content,
+      status,
+      author_id,
+      piblished_at
+      )
+      VALUES ($1,$2,$3,$4,$5)
+      RETURNING *
+      `,
+      [
+        input.data.title,
+        input.data.content,
+        input.data.status,
+        req.user.userId,
+        publishedAt,
+      ],
+    );
+    return res.status(200).json({
+      message: ' Post has been created',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
 
-  // ภารกิจที่ 3
-  // 1. INSERT title, content, status และ req.user.userId
-  // 2. ห้ามอ่าน authorId จาก req.body
-  // 3. กำหนด published_at เฉพาะเมื่อ status เป็น "published"
-  // 4. ส่ง status 201 พร้อมโพสต์ที่สร้างและ author_name
-
-  return res.status(501).json({
-    message: 'Mission 3: Create Post API is not implemented',
-  });
+    return res.status(500).json({
+      message: 'Can not created post',
+    });
+  }
 });
+
+// ภารกิจที่ 3
+// 1. INSERT title, content, status และ req.user.userId
+// 2. ห้ามอ่าน authorId จาก req.body
+// 3. กำหนด published_at เฉพาะเมื่อ status เป็น "published"
+// 4. ส่ง status 201 พร้อมโพสต์ที่สร้างและ author_name
+
+//   return res.status(501).json({
+//     message: 'Mission 3: Create Post API is not implemented',
+//   });
+// });
 
 postRouter.get('/:postId', async (req, res) => {
   const postId = parsePostId(req.params.postId);
