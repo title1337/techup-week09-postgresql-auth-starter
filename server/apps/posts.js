@@ -142,18 +142,20 @@ postRouter.post('/', protect, async (req, res) => {
       message: input.error,
     });
   }
+
   const publishedAt = input.data.status === 'published' ? new Date() : null;
+
   try {
     const result = await connectionPool.query(
       `
-      INSERT INTO post (
-      title,
-      content,
-      status,
-      author_id,
-      piblished_at
+      INSERT INTO posts (
+        title,
+        content,
+        status,
+        author_id,
+        published_at
       )
-      VALUES ($1,$2,$3,$4,$5)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
       `,
       [
@@ -164,8 +166,9 @@ postRouter.post('/', protect, async (req, res) => {
         publishedAt,
       ],
     );
+
     return res.status(200).json({
-      message: ' Post has been created',
+      message: 'Post has been created',
       data: result.rows[0],
     });
   } catch (error) {
