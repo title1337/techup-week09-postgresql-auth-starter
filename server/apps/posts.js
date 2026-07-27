@@ -186,11 +186,6 @@ postRouter.post('/', protect, async (req, res) => {
 // 3. กำหนด published_at เฉพาะเมื่อ status เป็น "published"
 // 4. ส่ง status 201 พร้อมโพสต์ที่สร้างและ author_name
 
-//   return res.status(501).json({
-//     message: 'Mission 3: Create Post API is not implemented',
-//   });
-// });
-
 postRouter.get('/:postId', async (req, res) => {
   const postId = parsePostId(req.params.postId);
 

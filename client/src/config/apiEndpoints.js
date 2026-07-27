@@ -4,13 +4,13 @@
 
 export const API_ENDPOINTS = {
   // งานหลัก
-  register: "",
-  login: "",
-  listPosts: "",
-  createPost: "",
+  register: '/auth/rigister',
+  login: '/auth/login',
+  listPosts: '/posts',
+  createPost: '/posts',
 
   // โจทย์เสริม
-  getPost: (postId) => "",
-  updatePost: (postId) => "",
-  deletePost: (postId) => "",
+  getPost: (postId) => `/posts/${postId}`,
+  updatePost: (postId) => `/posts/${postId}`,
+  deletePost: (postId) => `/posts/${postId}`,
 };

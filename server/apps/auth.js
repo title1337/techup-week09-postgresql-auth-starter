@@ -123,6 +123,89 @@ authRouter.post('/register', async (req, res) => {
 // 4. ส่ง status 201 พร้อมผลลัพธ์จาก safeUser(...)
 // 5. เมื่อ PostgreSQL แจ้งรหัสข้อมูลซ้ำ 23505 ให้เปลี่ยนเป็น status 409
 
+// authRouter.post('/login', async (req, res) => {
+//   const input = validateLoginBody(req.body);
+
+//   if (input.error) {
+//     return res.status(400).json({
+//       message: input.error,
+//     });
+//   }
+//   // ภารกิจที่ 1B
+//   // 1. SELECT ผู้ใช้ด้วย input.data.username
+//   // 2. เปรียบเทียบ input.data.password กับ password_hash
+//   // 3. ใช้ข้อความ 401 แบบเดียวกันทั้งกรณีไม่พบผู้ใช้และรหัสผ่านไม่ถูกต้อง
+//   // 4. สร้าง token จาก { userId, username } ด้วย JWT_SECRET และกำหนดอายุ 2 ชั่วโมง
+//   // 5. ส่ง token และข้อมูลผู้ใช้ที่ปลอดภัยกลับไป
+
+//   try {
+//     const result = await connectionPool.query(
+//       `
+//       SELECT
+//         user_id,
+//         username,
+//         password_hash,
+//         first_name,
+//         last_name,
+//         created_at
+//       FROM users
+//       WHERE username = $1
+//       `,
+//       [input.data.username],
+//     );
+
+//     const user = result.rows[0];
+//     // console.log("result before encrypt", user)
+//     if (!user) {
+//       console.log('user wrong', user);
+//       return res.status(401).json({
+//         message: 'Incorrect username or password',
+//       });
+//     }
+
+//     const passwordMatches = await bcrypt.compare(
+//       input.data.password,
+//       user.password_hash,
+//     );
+//     console.log('passwordmatch', passwordMatches);
+//     if (!passwordMatches) {
+//       return res.status(401).json({
+//         message: 'Incorrect username or password',
+//       });
+//     }
+
+//     if (!process.env.JWT_SECRET) {
+//       return res.status(401).json({
+//         message: 'JWT WRONG',
+//       });
+//     }
+//     const token = jwt.sign(
+//       {
+//         userId: user.user_id,
+//         username: user.username,
+//       },
+//       process.env.JWT_SECRET,
+//       {
+//         expiresIn: '2h',
+//       },
+//     );
+//     return res.status(200).json({
+//       message: 'Login Sucessfully',
+//       token,
+//       user: safeUser(user),
+//     });
+//   } catch (error) {
+//     console.error('hahahahah', error.message);
+//     return res.status(500).json({
+//       message: 'Server cannot login',
+//     });
+//   }
+
+//   return res.status(501).json({
+//     message: 'Mission 1B: Login API is not implemented',
+//   });
+// });
+
 authRouter.post('/login', async (req, res) => {
   const input = validateLoginBody(req.body);
 
@@ -131,14 +214,17 @@ authRouter.post('/login', async (req, res) => {
       message: input.error,
     });
   }
+
   try {
     const result = await connectionPool.query(
-      ` SELECT user_id, username, password_hash, first_name, last_name
-      FROM  users
-      WHERE username = $1 
-    `,
+      `
+      SELECT user_id, username, password_hash, first_name, last_name
+      FROM users
+      WHERE username = $1
+      `,
       [input.data.username],
     );
+
     const user = result.rows[0];
 
     if (!user) {
@@ -147,12 +233,12 @@ authRouter.post('/login', async (req, res) => {
       });
     }
 
-    const isPassawordValid = await bcrypt.compare(
+    const isPasswordValid = await bcrypt.compare(
       input.data.password,
       user.password_hash,
     );
 
-    if (!isPassawordValid) {
+    if (!isPasswordValid) {
       return res.status(401).json({
         message: 'Invalid username or password',
       });
@@ -168,25 +254,24 @@ authRouter.post('/login', async (req, res) => {
         expiresIn: '2h',
       },
     );
+
     return res.status(200).json({
       message: 'Login successful',
-      data: {
-        token,
-        user: safeUser(user),
-      },
+      token,
+      user: safeUser(user),
     });
   } catch (error) {
     console.log(error);
+
     return res.status(500).json({
       message: 'Something went wrong',
     });
   }
-  // ภารกิจที่ 1B
-  // 1. SELECT ผู้ใช้ด้วย input.data.username
-  // 2. เปรียบเทียบ input.data.password กับ password_hash
-  // 3. ใช้ข้อความ 401 แบบเดียวกันทั้งกรณีไม่พบผู้ใช้และรหัสผ่านไม่ถูกต้อง
-  // 4. สร้าง token จาก { userId, username } ด้วย JWT_SECRET และกำหนดอายุ 2 ชั่วโมง
-  // 5. ส่ง token และข้อมูลผู้ใช้ที่ปลอดภัยกลับไป
 });
-
+// ภารกิจที่ 1B
+// 1. SELECT ผู้ใช้ด้วย input.data.username
+// 2. เปรียบเทียบ input.data.password กับ password_hash
+// 3. ใช้ข้อความ 401 แบบเดียวกันทั้งกรณีไม่พบผู้ใช้และรหัสผ่านไม่ถูกต้อง
+// 4. สร้าง token จาก { userId, username } ด้วย JWT_SECRET และกำหนดอายุ 2 ชั่วโมง
+// 5. ส่ง token และข้อมูลผู้ใช้ที่ปลอดภัยกลับไป
 export default authRouter;
