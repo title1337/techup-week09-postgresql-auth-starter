@@ -195,9 +195,37 @@ postRouter.get('/:postId', async (req, res) => {
     });
   }
 
-  return res.status(501).json({
-    message: 'Bonus: Get Post API is not implemented',
-  });
+  try {
+    const result = await connectionPool.query(
+      `   SELECT
+          p.post_id,
+          p.title,
+          p.content,
+          p.status,
+          p.author_id,
+          p.created_at,
+          p.updated_at,
+          p.published_at,
+          CONCAT(u.first_name, ' ', u.last_name) AS author_name
+        FROM posts p
+        JOIN users u ON p.author_id = u.user_id
+        WHERE p.post_id = $1`,
+      [postId],
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Post not found',
+      });
+    }
+    return res.status(200).json({
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('[GET / post/:postId error:', error.message);
+    return res.status(500).json({
+      message: 'Server could not get post',
+    });
+  }
 });
 
 postRouter.put('/:postId', protect, async (req, res) => {
